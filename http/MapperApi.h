@@ -21,6 +21,7 @@ typedef struct {
 
 typedef struct {
     char *url;
+    char *path;
     void (*Callback)();
     char *TagName;
 } Router;
@@ -31,6 +32,4 @@ int HandleNetworkRequests(int HttpMapper);
 int CloseServer(HttpMapper *server);
 char *GetUrl(char *ResponseBuffer);
 HTMLData *InitHTML(char *path);
-
-void ParseRouter(Router *router);
-
+void ParseRouter(Router *routers, char *url, int size);

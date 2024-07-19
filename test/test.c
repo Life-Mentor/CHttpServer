@@ -1,6 +1,7 @@
 #include "./test.h"
 #include "../utils/Utlis.h"
 #include <stdio.h>
+#include <string.h>
 
 HTMLData *InitHTML(char *path) {
   HTMLData *data = (HTMLData *)malloc(sizeof(HTMLData));
@@ -35,4 +36,12 @@ HTMLData *InitHTML(char *path) {
 
   fclose(HtmlFd);
   return data;
+}
+
+void ParseRouter(Router *routers, char *url, int size) {
+  for (int i = 0; i < size; i++) {
+        if (strcmp(routers[i].url,url) == 0) {
+            routers->Callback();
+        }
+    }
 }

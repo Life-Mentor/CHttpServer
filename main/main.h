@@ -1,9 +1,6 @@
-#include "../http/MapperApi.h"
-#include "../utils/Utlis.h"
-
-int hello();
+ hello(char *path);
 
 Router routers[] = {
-    { "/hello", hello, "hello"},
+    { "/hello","/home/duck/ACODE/C/My_Probjects/C_Http_Server/test/test.html", hello, "hello"},
 };
 
