@@ -8,6 +8,12 @@
 
 #include "MapperApi.h"
 #include "../utils/Utlis.h"
+  
+char *response = "HTTP/1.1 200 OK\r\n"
+      "Content-Type: text/html\r\n"
+      "Content-Length: %zu\r\n"
+      "\r\n"
+      "%s";
 
 int InitServer(HttpMapper *hm, char *ip, int prot)
 {
@@ -19,7 +25,6 @@ int InitServer(HttpMapper *hm, char *ip, int prot)
     hm->server_addrs.sin_addr.s_addr = inet_addr(ip);
     hm->server_addrs.sin_family = AF_INET;
     hm->server_addrs.sin_port = htons(prot);
-    // printf("OK Init\n");
 
     return 0;
 }
@@ -53,17 +58,7 @@ int HandleNetworkRequests(int AcceptFd)
     printf("URL:%s\n",url);
     free(buffer.data);
 
-    char *response = "HTTP/1.1 200 OK\r\n"
-        "Content-Type: text/html\r\n"
-        "Content-Length: %zu\r\n"
-        "\r\n"
-        "%s";
-    char *html = "<h1>Welcome to the C HTTP Server!</h1>";
-
     char text[1024];
-    snprintf(text, sizeof(text),
-             response,
-             strlen(html),html);
     send(AcceptFd,text,1024,0);
 
     return 0;
@@ -82,5 +77,22 @@ char *GetUrl(char *ResponseBuffer)
     char *p = strtok(NULL, " ");
     return p;
 }
+
+
+HTMLData *InitHTML(size_t BodySize, char path)
+{
+  HTMLData *data;
+
+  FILE *HtmlFd = fopen(&path, "r");
+  if (NULL == HtmlFd) {
+    printf("HtmlFileNo\n");
+    die("HtmlFileError\n");
+  }
+
+
+  return data;
+}
+
+
 
 
