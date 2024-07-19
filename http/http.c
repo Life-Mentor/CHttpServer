@@ -1,77 +1,83 @@
-#include <sys/socket.h>
-#include <unistd.h>
-#include <netinet/in.h>
 #include <arpa/inet.h>
+#include <netinet/in.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/socket.h>
+#include <unistd.h>
 
-#include "MapperApi.h"
 #include "../utils/Utlis.h"
-  
-char *response = "HTTP/1.1 200 OK\r\n"
-      "Content-Type: text/html\r\n"
-      "Content-Length: %zu\r\n"
-      "\r\n"
-      "%s";
+#include "MapperApi.h"
 
-int InitServer(HttpMapper *hm, char *ip, int prot)
-{
-    hm->server_fd = socket(AF_INET, SOCK_STREAM, 0);
-    if (hm->server_fd < 0)
-    {
-        die("SocketError\n");
-    }
-    hm->server_addrs.sin_addr.s_addr = inet_addr(ip);
-    hm->server_addrs.sin_family = AF_INET;
-    hm->server_addrs.sin_port = htons(prot);
+#define RESPONSE_TEMPLATE "HTTP/1.1 200 OK\r\n" \
+                          "Content-Type: text/html\r\n" \
+                          "Content-Length: %zu\r\n" \
+                          "\r\n" \
+                          "%s"
 
-    return 0;
+int InitServer(HttpMapper *hm, char *ip, int prot) {
+  hm->server_fd = socket(AF_INET, SOCK_STREAM, 0);
+  if (hm->server_fd < 0) {
+    die("SocketError\n");
+  }
+  hm->server_addrs.sin_addr.s_addr = inet_addr(ip);
+  hm->server_addrs.sin_family = AF_INET;
+  hm->server_addrs.sin_port = htons(prot);
+
+  return 0;
 }
-int StartServer(HttpMapper *sm)
-{
-    if (bind(sm->server_fd, (struct sockaddr *)&sm->server_addrs, sizeof(sm->server_addrs)) < 0) {
-        die("BindError\n");
+int StartServer(HttpMapper *sm) {
+  if (bind(sm->server_fd, (struct sockaddr *)&sm->server_addrs,
+           sizeof(sm->server_addrs)) < 0) {
+    die("BindError\n");
+  }
+  if (listen(sm->server_fd, 5) < 0) {
+    die("ListenError\n");
+  }
+  socklen_t SM_len = sizeof(sm->server_addrs);
+  while (1) {
+    int acceptFd =
+        accept(sm->server_fd, (struct sockaddr *)&sm->server_addrs, &SM_len);
+    if (acceptFd < 0) {
+      die("AcceptError\n");
+      return -1;
     }
-    if (listen(sm->server_fd, 5) < 0) {
-        die("ListenError\n");
+    HandleNetworkRequests(acceptFd);
+    close(acceptFd);
+  }
+  return 0;
+}
+int HandleNetworkRequests(int AcceptFd) {
+  ResponseBuffer buffer;
+  CreateBuffer(&buffer, 1024);
+  read(AcceptFd, buffer.data, buffer.size);
+  char *url = GetUrl(buffer.data);
+
+  char text[1024];
+
+  HTMLData *data = InitHTML("/home/duck/ACODE/C/My_Probjects/C_Http_Server/test/test.html");
+  if (data) {
+    char *response = (char *)malloc( sizeof(char) * (data->BodySize + strlen(RESPONSE_TEMPLATE)));
+    if (response) {
+      snprintf(response, data->BodySize + strlen(RESPONSE_TEMPLATE), RESPONSE_TEMPLATE, data->BodySize, data->HtmlBody);
+      send(AcceptFd, response, strlen(response), 0);
+      free(response);
     }
-    socklen_t SM_len = sizeof(sm->server_addrs);
-    while (1) {
-        int acceptFd = accept(sm->server_fd, (struct sockaddr *)&sm->server_addrs, &SM_len);
-        if (acceptFd < 0) {
-            die("AcceptError\n");
-            return -1;
-        }
-        HandleNetworkRequests(acceptFd);
-        close(acceptFd);
-    }
-    return 0;
-}
-int HandleNetworkRequests(int AcceptFd)
-{
-    ResponseBuffer buffer;
-    CreateBuffer(&buffer, 1024);
-    read(AcceptFd,buffer.data,buffer.size);
-    char *url = GetUrl(buffer.data);
+  }
+  send(AcceptFd, data->HtmlBody, data->BodySize, 0);
+  free(data->HtmlBody);
 
-    char text[1024];
-    HTMLData *data = InitHTML("/home/duck/CODE/CHttpServer/test/test.html");
-    send(AcceptFd,data->HtmlBody,data->BodySize,0);
-
-    return 0;
+  return 0;
 }
-int CloseServer(HttpMapper *server)
-{
-    close(server->server_fd);
-    return 0;
+int CloseServer(HttpMapper *server) {
+  close(server->server_fd);
+  return 0;
 }
 
-char *GetUrl(char *ResponseBuffer)
-{
-    strtok(ResponseBuffer, " ");
-    char *p = strtok(NULL, " ");
-    return p;
+char *GetUrl(char *ResponseBuffer) {
+  strtok(ResponseBuffer, " ");
+  char *p = strtok(NULL, " ");
+  return p;
 }
 
 HTMLData *InitHTML(char *path) {
@@ -101,16 +107,14 @@ HTMLData *InitHTML(char *path) {
   }
 
   fread(data->HtmlBody, sizeof(char), len, HtmlFd);
-  int ResponseLen = strlen(response);
-  data->BodySize = data->BodySize + ResponseLen;
-  snprintf(data->HtmlBody, data->BodySize, response,data->HtmlBody);
   data->HtmlBody[len] = '\0';
   data->BodySize = len;
-
-  printf("%zu':'%s\n", data->BodySize, data->HtmlBody);
   fclose(HtmlFd);
   return data;
 }
 
+void ParseRouter(Router *router)
+{
 
+}
 

@@ -19,9 +19,18 @@ typedef struct {
   char *HtmlBody;
 } HTMLData;
 
+typedef struct {
+    char *url;
+    void (*Callback)();
+    char *TagName;
+} Router;
+
 int InitServer(HttpMapper *hm, char *ip, int prot);
 int StartServer(HttpMapper *sm);
 int HandleNetworkRequests(int HttpMapper);
 int CloseServer(HttpMapper *server);
 char *GetUrl(char *ResponseBuffer);
 HTMLData *InitHTML(char *path);
+
+void ParseRouter(Router *router);
+
