@@ -30,7 +30,6 @@ int InitServer(HttpMapper *hm, char *ip, int prot)
 }
 int StartServer(HttpMapper *sm)
 {
-    // printf("OK Start\n");
     if (bind(sm->server_fd, (struct sockaddr *)&sm->server_addrs, sizeof(sm->server_addrs)) < 0) {
         die("BindError\n");
     }
@@ -55,44 +54,63 @@ int HandleNetworkRequests(int AcceptFd)
     CreateBuffer(&buffer, 1024);
     read(AcceptFd,buffer.data,buffer.size);
     char *url = GetUrl(buffer.data);
-    printf("URL:%s\n",url);
-    free(buffer.data);
 
     char text[1024];
-    send(AcceptFd,text,1024,0);
+    HTMLData *data = InitHTML("/home/duck/CODE/CHttpServer/test/test.html");
+    send(AcceptFd,data->HtmlBody,data->BodySize,0);
 
     return 0;
 }
 int CloseServer(HttpMapper *server)
 {
-    // printf("OK CloseServer\n");
     close(server->server_fd);
     return 0;
 }
 
 char *GetUrl(char *ResponseBuffer)
 {
-    // printf("%s\n",ResponseBuffer);
     strtok(ResponseBuffer, " ");
     char *p = strtok(NULL, " ");
     return p;
 }
 
-
-HTMLData *InitHTML(size_t BodySize, char path)
-{
-  HTMLData *data;
-
-  FILE *HtmlFd = fopen(&path, "r");
-  if (NULL == HtmlFd) {
-    printf("HtmlFileNo\n");
-    die("HtmlFileError\n");
+HTMLData *InitHTML(char *path) {
+  HTMLData *data = (HTMLData *)malloc(sizeof(HTMLData));
+  if (NULL == data) {
+    die("HTMLDataError:");
   }
 
+  data->path = path;
+  data->FileName = path;
 
+  FILE *HtmlFd = fopen(path, "r");
+  if (NULL == HtmlFd) {
+    free(data);
+    die("HtmlData");
+  }
+
+  fseek(HtmlFd, 0, SEEK_END);
+  int len = ftell(HtmlFd);
+  fseek(HtmlFd, 0, SEEK_SET);
+
+  data->HtmlBody = (char *)malloc(sizeof(char) * (len + 1));
+  if (data->HtmlBody == NULL) {
+    fclose(HtmlFd);
+    free(data);
+    die("Memory allocation error for HtmlBody");
+  }
+
+  fread(data->HtmlBody, sizeof(char), len, HtmlFd);
+  int ResponseLen = strlen(response);
+  data->BodySize = data->BodySize + ResponseLen;
+  snprintf(data->HtmlBody, data->BodySize, response,data->HtmlBody);
+  data->HtmlBody[len] = '\0';
+  data->BodySize = len;
+
+  printf("%zu':'%s\n", data->BodySize, data->HtmlBody);
+  fclose(HtmlFd);
   return data;
 }
-
 
 
 

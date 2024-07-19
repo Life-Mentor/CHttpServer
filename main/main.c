@@ -4,7 +4,7 @@
 int main(int argc, char *argv[]) 
 {
     HttpMapper *HTTP;
-    if( InitServer(HTTP, "127.0.0.1", 1232) != 0) {
+    if( InitServer(HTTP, "127.0.0.1", 1233) != 0) {
         die("HttpError");
     }
 

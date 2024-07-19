@@ -2,19 +2,36 @@
 #include "../utils/Utlis.h"
 #include <stdio.h>
 
-HTMLData *InitHTML(char *path)
-{
-  HTMLData *data;
+HTMLData *InitHTML(char *path) {
+  HTMLData *data = (HTMLData *)malloc(sizeof(HTMLData));
+  if (NULL == data) {
+    die("HTMLDataError:");
+  }
+
+  data->path = path;
+  data->FileName = path;
+
   FILE *HtmlFd = fopen(path, "r");
   if (NULL == HtmlFd) {
+    free(data);
     die("HtmlData");
   }
 
   fseek(HtmlFd, 0, SEEK_END);
   int len = ftell(HtmlFd);
-  char *buff = (char *)malloc(sizeof(char) * len + 10);
-  fgets(buff, len, HtmlFd);
-  printf("%d':'%s\n",len,buff);
+  fseek(HtmlFd, 0, SEEK_SET);
+
+  data->HtmlBody = (char *)malloc(sizeof(char) * (len + 1));
+  if (data->HtmlBody == NULL) {
+    fclose(HtmlFd);
+    free(data);
+    die("Memory allocation error for HtmlBody");
+  }
+
+  fread(data->HtmlBody, sizeof(char), len, HtmlFd);
+  data->HtmlBody[len] = '\0';
+  data->BodySize = len;
+  printf("%zu':'%s\n", data->BodySize, data->HtmlBody);
 
   fclose(HtmlFd);
   return data;

@@ -2,7 +2,10 @@
 
 int main()
 {
-  InitHTML("/home/duck/CODE/CHttpServer/test/test.html");
+  HTMLData *data = InitHTML("/home/duck/CODE/CHttpServer/test/test.html");
+  printf("File content:\n%s\n", data->HtmlBody);
+  free(data->HtmlBody);
+  free(data);
   return EXIT_SUCCESS;
 }
 

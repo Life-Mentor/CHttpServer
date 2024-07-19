@@ -12,10 +12,9 @@ typedef struct {
     int server_fd;
     struct sockaddr_in server_addrs;
 } HttpMapper;
-
 typedef struct {
-  char FileName;
-  char path;
+  char *FileName;
+  char *path;
   size_t BodySize;
   char *HtmlBody;
 } HTMLData;
@@ -25,7 +24,4 @@ int StartServer(HttpMapper *sm);
 int HandleNetworkRequests(int HttpMapper);
 int CloseServer(HttpMapper *server);
 char *GetUrl(char *ResponseBuffer);
-
-HTMLData *InitHTML(size_t BodySize, char path);
-
-
+HTMLData *InitHTML(char *path);
