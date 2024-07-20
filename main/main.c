@@ -6,7 +6,7 @@ Router routers[] = {
 const int router_count = sizeof(routers) / sizeof(routers[0]);
 int main(int argc, char *argv[]) {
   HttpMapper *HTTP;
-  if (InitServer(HTTP, "127.0.0.1", 1232) != 0) {
+  if (InitServer(HTTP, "127.0.0.1", 1233) != 0) {
     die("HttpError");
   }
 
@@ -18,7 +18,9 @@ int main(int argc, char *argv[]) {
   CloseServer(HTTP);
   return EXIT_SUCCESS;
 }
-void hello(char *path)
+
+HTMLData *hello(char *path)
 {
-    printf("hello world\n");
+    HTMLData *html = InitHTML(path);
+    return html;
 }

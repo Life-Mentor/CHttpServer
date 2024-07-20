@@ -7,13 +7,14 @@
 #include <unistd.h>
 
 #include "../main/main.h"
+#include "MapperApi.h"
 
 #define RESPONSE_TEMPLATE_404                                                  \
   "HTTP/1.1 200 OK\r\n"                                                        \
   "Content-Type: text/html\r\n"                                                \
   "Content-Length: %zu\r\n"                                                    \
   "\r\n"                                                                       \
-  "%s"
+  "<h1>404 Error"
 #define RESPONSE_TEMPLATE_200                                                  \
   "HTTP/1.1 200 OK\r\n"                                                        \
   "Content-Type: text/html\r\n"                                                \
@@ -29,7 +30,6 @@ int InitServer(HttpMapper *hm, char *ip, int prot) {
   hm->server_addrs.sin_addr.s_addr = inet_addr(ip);
   hm->server_addrs.sin_family = AF_INET;
   hm->server_addrs.sin_port = htons(prot);
-    printf("InitServer OK\n");
 
   return 0;
 }
@@ -52,7 +52,6 @@ int StartServer(HttpMapper *sm) {
     HandleNetworkRequests(acceptFd);
     close(acceptFd);
   }
-    printf("StartServer OK\n");
   return 0;
 }
 int HandleNetworkRequests(int AcceptFd) {
@@ -60,22 +59,25 @@ int HandleNetworkRequests(int AcceptFd) {
   CreateBuffer(&buffer, 1024);
   read(AcceptFd, buffer.data, buffer.size);
   char *url = GetUrl(buffer.data);
-    printf("开始处理请求\n");
-  ParseRouter(routers, url, router_count);
-    printf("路由解析正确\n");
-  HTMLData *data = InitHTML("/home/duck/ACODE/C/My_Probjects/C_Http_Server/test/test.html");
-  if (data) {
-    char *response = (char *)malloc(
-        sizeof(char) * (data->BodySize + strlen(RESPONSE_TEMPLATE_200)));
-    if (response) {
-      snprintf(response, data->BodySize + strlen(RESPONSE_TEMPLATE_200),
-               RESPONSE_TEMPLATE_200, data->BodySize, data->HtmlBody);
-      send(AcceptFd, response, strlen(response), 0);
-      free(response);
+  Router OkRouter = ParseRouter(routers, url, router_count);
+  if (NULL == OkRouter.url) {
+    send(AcceptFd, RESPONSE_TEMPLATE_404, sizeof(RESPONSE_TEMPLATE_404), 0);
+  } else {
+    HTMLData *data = OkRouter.Callback(OkRouter.path);
+    if (data) {
+      char *response = (char *)malloc(
+          sizeof(char) * (data->BodySize + strlen(RESPONSE_TEMPLATE_200)));
+      if (response) {
+        snprintf(response, data->BodySize + strlen(RESPONSE_TEMPLATE_200),
+                 RESPONSE_TEMPLATE_200, data->BodySize, data->HtmlBody);
+        send(AcceptFd, response, strlen(response), 0);
+        free(response);
+      }
     }
+    send(AcceptFd, data->HtmlBody, data->BodySize, 0);
+    free(data->HtmlBody);
+    free(data);
   }
-  send(AcceptFd, data->HtmlBody, data->BodySize, 0);
-  free(data->HtmlBody);
 
   return 0;
 }
@@ -123,10 +125,13 @@ HTMLData *InitHTML(char *path) {
   return data;
 }
 
-void ParseRouter(Router *routers, char *url, int size) {
+Router ParseRouter(Router *routers, char *url, int size) {
   for (int i = 0; i < size; i++) {
-    if (strcmp(routers[i].url, url) == 0) {
-      routers->Callback();
+    if (routers[i].url != NULL && url != NULL &&
+        strcmp(routers[i].url, url) == 0) {
+      return routers[i];
     }
   }
+  Router NullRouter = {NULL, NULL, NULL, NULL};
+  return NullRouter;
 }
