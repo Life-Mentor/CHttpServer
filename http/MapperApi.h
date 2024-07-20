@@ -1,3 +1,4 @@
+#ifndef HTTP_API
 #define HTTP_API
 
 #include <sys/socket.h>
@@ -33,3 +34,4 @@ int CloseServer(HttpMapper *server);
 char *GetUrl(char *ResponseBuffer);
 HTMLData *InitHTML(char *path);
 void ParseRouter(Router *routers, char *url, int size);
+#endif // !HttpMapper

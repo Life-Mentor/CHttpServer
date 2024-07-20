@@ -29,6 +29,7 @@ int InitServer(HttpMapper *hm, char *ip, int prot) {
   hm->server_addrs.sin_addr.s_addr = inet_addr(ip);
   hm->server_addrs.sin_family = AF_INET;
   hm->server_addrs.sin_port = htons(prot);
+    printf("InitServer OK\n");
 
   return 0;
 }
@@ -51,6 +52,7 @@ int StartServer(HttpMapper *sm) {
     HandleNetworkRequests(acceptFd);
     close(acceptFd);
   }
+    printf("StartServer OK\n");
   return 0;
 }
 int HandleNetworkRequests(int AcceptFd) {
@@ -58,12 +60,10 @@ int HandleNetworkRequests(int AcceptFd) {
   CreateBuffer(&buffer, 1024);
   read(AcceptFd, buffer.data, buffer.size);
   char *url = GetUrl(buffer.data);
-
-  int size = sizeof(routers) / sizeof(routers[0]);
-  ParseRouter(routers, url, size);
-
-  HTMLData *data =
-      InitHTML("/home/duck/ACODE/C/My_Probjects/C_Http_Server/test/test.html");
+    printf("开始处理请求\n");
+  ParseRouter(routers, url, router_count);
+    printf("路由解析正确\n");
+  HTMLData *data = InitHTML("/home/duck/ACODE/C/My_Probjects/C_Http_Server/test/test.html");
   if (data) {
     char *response = (char *)malloc(
         sizeof(char) * (data->BodySize + strlen(RESPONSE_TEMPLATE_200)));
