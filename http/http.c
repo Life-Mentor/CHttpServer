@@ -6,9 +6,15 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
-#include "../main/main.c"
+#include "../main/main.h"
 
-#define RESPONSE_TEMPLATE                                                      \
+#define RESPONSE_TEMPLATE_404                                                  \
+  "HTTP/1.1 200 OK\r\n"                                                        \
+  "Content-Type: text/html\r\n"                                                \
+  "Content-Length: %zu\r\n"                                                    \
+  "\r\n"                                                                       \
+  "%s"
+#define RESPONSE_TEMPLATE_200                                                  \
   "HTTP/1.1 200 OK\r\n"                                                        \
   "Content-Type: text/html\r\n"                                                \
   "Content-Length: %zu\r\n"                                                    \
@@ -56,15 +62,14 @@ int HandleNetworkRequests(int AcceptFd) {
   int size = sizeof(routers) / sizeof(routers[0]);
   ParseRouter(routers, url, size);
 
-  char text[1024];
-
-  HTMLData *data = InitHTML("/home/duck/ACODE/C/My_Probjects/C_Http_Server/test/test.html");
+  HTMLData *data =
+      InitHTML("/home/duck/ACODE/C/My_Probjects/C_Http_Server/test/test.html");
   if (data) {
     char *response = (char *)malloc(
-        sizeof(char) * (data->BodySize + strlen(RESPONSE_TEMPLATE)));
+        sizeof(char) * (data->BodySize + strlen(RESPONSE_TEMPLATE_200)));
     if (response) {
-      snprintf(response, data->BodySize + strlen(RESPONSE_TEMPLATE),
-               RESPONSE_TEMPLATE, data->BodySize, data->HtmlBody);
+      snprintf(response, data->BodySize + strlen(RESPONSE_TEMPLATE_200),
+               RESPONSE_TEMPLATE_200, data->BodySize, data->HtmlBody);
       send(AcceptFd, response, strlen(response), 0);
       free(response);
     }
