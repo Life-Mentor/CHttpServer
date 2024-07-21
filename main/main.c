@@ -1,7 +1,8 @@
 #include "./main.h"
+#include <stdlib.h>
 
 Router routers[] = {
-    { "/hello","/home/duck/ACODE/C/My_Probjects/C_Http_Server/test/test.html", hello, "hello"},
+    {"/hello", "test.html", hello, "hello"},
 };
 const int router_count = sizeof(routers) / sizeof(routers[0]);
 int main(int argc, char *argv[]) {
@@ -19,8 +20,7 @@ int main(int argc, char *argv[]) {
   return EXIT_SUCCESS;
 }
 
-HTMLData *hello(char *path)
-{
-    HTMLData *html = InitHTML(path);
-    return html;
+HTMLData *hello(char *path) {
+  HTMLData *html = InitHTML(path);
+  return html;
 }

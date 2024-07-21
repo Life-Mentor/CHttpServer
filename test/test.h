@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <pcre.h>
 
 typedef struct {
   char *FileName;
@@ -16,3 +17,5 @@ typedef struct {
 
 HTMLData *InitHTML(char *path);
 void ParseRouter(Router *routers, char *url, int size);
+void TempleteReplace(HTMLData *html);
+

@@ -1,5 +1,6 @@
 #include "./test.h"
 #include "../utils/Utlis.h"
+#include <pcre.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -45,3 +46,17 @@ void ParseRouter(Router *routers, char *url, int size) {
         }
     }
 }
+void TempleteReplace(HTMLData *html)
+{
+    pcre *RE;
+}
+
+
+
+
+
+
+
+
+
+

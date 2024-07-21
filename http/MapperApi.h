@@ -8,13 +8,15 @@
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdarg.h>
+#include <unistd.h>
 
 typedef struct {
     int server_fd;
     struct sockaddr_in server_addrs;
 } HttpMapper;
+
 typedef struct {
-  char *FileName;
   char *path;
   size_t BodySize;
   char *HtmlBody;
@@ -26,6 +28,8 @@ typedef struct {
     HTMLData *(*Callback)(char *path);
     char *TagName;
 } Router;
+
+// typedef struct { } ;
 
 int InitServer(HttpMapper *hm, char *ip, int prot);
 int StartServer(HttpMapper *sm);

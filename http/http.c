@@ -1,4 +1,7 @@
 #include <arpa/inet.h>
+#include <errno.h>
+#include <limits.h>
+#include <linux/limits.h>
 #include <netinet/in.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -30,6 +33,7 @@ int InitServer(HttpMapper *hm, char *ip, int prot) {
   hm->server_addrs.sin_addr.s_addr = inet_addr(ip);
   hm->server_addrs.sin_family = AF_INET;
   hm->server_addrs.sin_port = htons(prot);
+  printf("Server start url : http://%s:%d\n", ip, prot);
 
   return 0;
 }
@@ -74,7 +78,6 @@ int HandleNetworkRequests(int AcceptFd) {
         free(response);
       }
     }
-    send(AcceptFd, data->HtmlBody, data->BodySize, 0);
     free(data->HtmlBody);
     free(data);
   }
@@ -98,10 +101,18 @@ HTMLData *InitHTML(char *path) {
     die("HTMLDataError:");
   }
 
-  data->path = path;
-  data->FileName = path;
+  char FilePath[PATH_MAX + 1];
+  char *ConfigFilePath = "main/templates";
+  // /home/duck/ACODE/C/My_Probjects/main
+  if (NULL == realpath(ConfigFilePath, FilePath)) {
+    printf("%s\n", FilePath);
+    die("FileError");
+  }
+  strcat(FilePath, "/");
+  strcat(FilePath, path);
+  data->path = FilePath;
 
-  FILE *HtmlFd = fopen(path, "r");
+  FILE *HtmlFd = fopen(data->path, "r");
   if (NULL == HtmlFd) {
     free(data);
     die("HtmlData");
