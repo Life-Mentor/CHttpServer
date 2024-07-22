@@ -7,7 +7,7 @@ Router routers[] = {
 const int router_count = sizeof(routers) / sizeof(routers[0]);
 int main(int argc, char *argv[]) {
   HttpMapper *HTTP;
-  if (InitServer(HTTP, "127.0.0.1", 1233) != 0) {
+  if (InitServer(HTTP, "127.0.0.1", 1234) != 0) {
     die("HttpError");
   }
 

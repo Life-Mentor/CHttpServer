@@ -110,7 +110,7 @@ HTMLData *InitHTML(char *path) {
   }
   strcat(FilePath, "/");
   strcat(FilePath, path);
-  data->path = FilePath;
+  data->path = strdup(FilePath);
 
   FILE *HtmlFd = fopen(data->path, "r");
   if (NULL == HtmlFd) {
