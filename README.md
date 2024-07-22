@@ -3,3 +3,7 @@
 
 QQ:959735909
 
+
+vim.opt.foldmethod = "expr"
+vim.opt.foldexpr = "nvim_treesitter#foldexpr()"
+-- vim.opt.foldenable = false
