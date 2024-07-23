@@ -12,7 +12,7 @@
 int main(int argc, char *argv[]) 
 {
   MYSQL *con = InitSQL("root", "qpal", "localhost", "duck");
-  ExcuteQuery(con, "select * from user");
+  ExecuteQuery(con, "select * from user");
 
   return EXIT_SUCCESS;
 }
